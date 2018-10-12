@@ -5,20 +5,22 @@ import os
 import math
 from DBAccessor import DBAccessor as dbac
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
 
 def sturgesFormula(n):
     return round(1 + math.log2(n))
 
-
-api_key = os.environ["PLOTLY_API_KEY"]
-plotly.tools.set_credentials_file(username='kaihuu', api_key=api_key)
+np.random.seed(0)
 
 #クエリ実行
 result = dbac.ExecuteQueryFromList(dbac.QueryString(), [306])
 #ビン数計算
 Num_of_bin = sturgesFormula(len(result))
 
-npresult = np.array(result)
+npresult = np.array(result, dtype='float')
 
 print(npresult)
 
@@ -27,15 +29,19 @@ min = np.amin(npresult, axis=0)
 
 print(max)
 print(min)
-print(max - min)
-
 print(Num_of_bin)
 
-x = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-y = ['Morning', 'Afternoon', 'Evening']
-z = [[1, 20, 30, 50, 1], [20, 1, 60, 80, 30], [30, 60, 1, -10, 20]]
+l = (max - min) / Num_of_bin
+print(l)
+
+xax = np.array([])
+for i in range(Num_of_bin):
+    print(min[0] + float(i) * l[0])
+    xax = np.append(xax, [min[0] + float(i) * l[0]])
 
 
-trace = go.Heatmap(z=z, x=x, y=y)
-data=[trace]
-#py.plot(data, filename='CHORALE')
+print(xax)
+
+uniform_data = np.random.rand(100, 100)
+#sns.heatmap(npresult)
+#plt.show()

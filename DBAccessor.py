@@ -31,7 +31,7 @@ class DBAccessor:
         DECLARE @id int
         SET @id = ?;
 
-        SELECT TRIP_ID, SUM(LOST_ENERGY), COUNT(*), MIN(JST)
+        SELECT COUNT(*), SUM(LOST_ENERGY)
         FROM ECOLOG_Doppler_NotMM, SEMANTIC_LINKS
         WHERE ECOLOG_Doppler_NotMM.DRIVER_ID = 17 AND SEMANTIC_LINKS.SEMANTIC_LINK_ID = @id AND SEMANTIC_LINKS.LINK_ID = ECOLOG_Doppler_NotMM.LINK_ID
         AND ECOLOG_Doppler_NotMM.TRIP_DIRECTION = 'outward'
