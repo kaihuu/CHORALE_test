@@ -45,13 +45,13 @@ def get_cmap():
 
     return magma,viridis
 
-def generateHeatmapData(Num_of_bin, df_result, xax, yax):
+def generateHeatmapData(Num_of_bin, df_result, xbin, ybin):
     result = np.empty((0, Num_of_bin), int)
     for i in range(Num_of_bin):
         arr = np.empty((0, Num_of_bin), int)
         for t in range(Num_of_bin):
-            df_af = df_result[(df_result[0] >= xax[i]) & (df_result[0] < xax[i + 1]) 
-            & (df_result[1] >= yax[t]) & (df_result[1] < yax[t + 1])]
+            df_af = df_result[(df_result[0] >= xbin[i]) & (df_result[0] < xbin[i + 1]) 
+            & (df_result[1] >= ybin[t]) & (df_result[1] < ybin[t + 1])]
             arr = np.append(arr, len(df_af))      
 
         result = np.append(result, [arr], axis=0)
@@ -97,39 +97,86 @@ def generateBinData(data):
     
 
     l = (max - min) / Num_of_bin
-    xax = generateAxisData(Num_of_bin, min[0], l[0])
-    yax = generateAxisData(Num_of_bin, min[1], l[1])
+    xbin = generateEachBinData(Num_of_bin, min[0], l[0])
+    ybin = generateEachBinData(Num_of_bin, min[1], l[1])
 
-    return xax, yax, df_result, Num_of_bin
+    return xbin, ybin, df_result, Num_of_bin
 
-def generateAxisData(Num_of_bin, min, length):
-    ax = np.array([])
+def generateEachBinData(Num_of_bin, min, length):
+    abin = np.array([])
     for i in range(Num_of_bin + 1):
-        ax = np.append(ax, [min + float(i) * length])
-    return ax
+        abin = np.append(abin, [min + float(i) * length])
+    return abin
 
-magma, viridis = get_cmap()
+def generateAxisData(xbin, ybin, Num_of_bin):
+    xax = []
+    yax = []
+    for i in range(Num_of_bin):
+        xax.append('{:.2e}'.format((xbin[i] + xbin[i+1]) / 2))
+        yax.append('{:.2e}'.format((ybin[i] + ybin[i+1]) / 2))
 
-semanticLinkID = 306
-#クエリ実行
-result = dbac.ExecuteQueryFromList(dbac.QueryString(), [semanticLinkID])
+    return xax, yax
 
-xax, yax, df_result, Num_of_bin = generateBinData(result)
+def showHeatmapGraph(semanticLinkID, tripDirection):
+    #クエリ実行
+    result = dbac.ExecuteQueryFromList(dbac.QueryString(), [semanticLinkID, tripDirection])
+    semanticInfo = dbac.ExecuteQueryFromList(dbac.QueryStringGetSemantics(), [semanticLinkID, tripDirection])
 
-heatmapData = generateHeatmapData(Num_of_bin, df_result, xax, yax)
-print(heatmapData)
+    xbin, ybin, df_result, Num_of_bin = generateBinData(result)
 
-cmap = sns.light_palette("blue", 1000)
-#sns.heatmap(heatmapData, cmap="rainbow")
-#plt.show()
-#trace = go.Heatmap(z=heatmapData, zsmooth = 'best', colorscale = "Blues")
+    heatmapData = generateHeatmapData(Num_of_bin, df_result, xbin, ybin)
 
-hoverlabel = dict(font=dict(size=20))
-colorbar = dict(tickfont=dict(size=20))
+    xax, yax = generateAxisData(xbin, ybin, Num_of_bin)
+
+    hoverlabel = dict(font=dict(size=20))
+    colorbar = dict(tickfont=dict(size=20))
 
 
-fig = ff.create_annotated_heatmap(z=heatmapData, colorscale = "Jet", 
-zsmooth = 'best', showscale = True, showlegend=True, hoverlabel=hoverlabel,
-colorbar=colorbar)
+    fig = ff.create_annotated_heatmap(x=xax, y=yax, z=heatmapData, colorscale = "Jet", 
+    zsmooth = 'best', showscale = True, showlegend=True, hoverlabel=hoverlabel,
+    colorbar=colorbar)
 
-offline.plot(fig)
+
+    axis_layout = dict(
+        tickfont=dict(
+            size=20
+        )
+    )
+
+    layout = dict(
+        xaxis=axis_layout,
+        yaxis=axis_layout
+        )
+
+    fig["layout"].setdefault("title", str(semanticInfo[0][0]) + "  " + semanticInfo[0][1])
+    fig["layout"].setdefault("titlefont", dict(size=30))
+
+    for i in range(Num_of_bin * Num_of_bin):
+        fig["layout"]["annotations"][i]["font"].setdefault("size", 16)
+
+    fig["layout"].setdefault("margin", dict(l=100))
+
+    fig["layout"]["xaxis"].setdefault("tickfont", dict(size=20))
+    fig["layout"]["yaxis"].setdefault("tickfont", dict(size=20))
+
+    fig["layout"]["xaxis"].setdefault("title", "Elapsed Time[s]")
+    fig["layout"]["yaxis"].setdefault("title", "LostEnergy[kWh]")
+
+    fig["layout"]["xaxis"].setdefault("titlefont", dict(size=20))
+    fig["layout"]["yaxis"].setdefault("titlefont", dict(size=20))
+
+    fig["layout"]["yaxis"].setdefault("tickformat", ".1e")
+
+    fig["layout"]["xaxis"].pop("side")
+    fig["layout"]["yaxis"].pop("ticksuffix")
+    fig["layout"]["xaxis"].pop("dtick")
+    fig["layout"]["yaxis"].pop("dtick")
+
+    offline.plot(fig, filename="CHORALE" + str(semanticLinkID) + ".html")
+
+#outward
+for i in range(304, 327):
+    showHeatmapGraph(i, "outward")
+#homeward
+for i in range(305, 328):
+    showHeatmapGraph(i, "homeward")
