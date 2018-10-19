@@ -37,7 +37,13 @@ class DBAccessor:
         AND ECOLOG_Doppler_NotMM.TRIP_DIRECTION = 'outward'
         GROUP BY TRIP_ID
         """
-        return query 
+        return query
+
+    @classmethod
+    def QueryStringGetSemantics(self):
+        query = """
+        """
+        return query
 
     @classmethod
     def ExecuteManyInsert(self, query, dataList):
