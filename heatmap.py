@@ -77,23 +77,23 @@ def generateBinData(data):
     minthereshold = Q1 - 1.5 * IQR
     print(minthereshold)
     print(df_result)
-    df_result = df_result[(df_result[0] >= minthereshold[0]) & (df_result[0] <= maxthereshold[0])
-                & (df_result[1] >= minthereshold[1]) & (df_result[1] <= maxthereshold[1])]
+    #df_result = df_result[(df_result[0] >= minthereshold[0]) & (df_result[0] <= maxthereshold[0])
+    #            & (df_result[1] >= minthereshold[1]) & (df_result[1] <= maxthereshold[1])]
     print(df_result)
     max = np.amax(npresult, axis=0)
     min = np.amin(npresult, axis=0)
 
-    if max[0] >= maxthereshold[0]:
-        max[0] = maxthereshold[0]
+    #if max[0] >= maxthereshold[0]:
+    #    max[0] = maxthereshold[0]
     
-    if max[1] >= maxthereshold[1]:
-        max[1] = maxthereshold[1]
+    #if max[1] >= maxthereshold[1]:
+    #    max[1] = maxthereshold[1]
 
-    if min[0] <= minthereshold[0]:
-        min[0] = minthereshold[0]
+    #if min[0] <= minthereshold[0]:
+    #    min[0] = minthereshold[0]
     
-    if min[1] <= minthereshold[1]:
-        min[1] = minthereshold[1]
+    #if min[1] <= minthereshold[1]:
+    #    min[1] = minthereshold[1]
     
 
     l = (max - min) / Num_of_bin
@@ -120,7 +120,7 @@ def generateAxisData(xbin, ybin, Num_of_bin):
 def showHeatmapGraph(semanticLinkID, tripDirection):
     #クエリ実行
     result = dbac.ExecuteQueryFromList(dbac.QueryString(), [semanticLinkID, tripDirection])
-    semanticInfo = dbac.ExecuteQueryFromList(dbac.QueryStringGetSemantics(), [semanticLinkID, tripDirection])
+    semanticInfo = dbac.ExecuteQueryFromList(dbac.QueryStringGetSemantics(), [semanticLinkID])
 
     xbin, ybin, df_result, Num_of_bin = generateBinData(result)
 
@@ -148,7 +148,7 @@ def showHeatmapGraph(semanticLinkID, tripDirection):
         yaxis=axis_layout
         )
 
-    fig["layout"].setdefault("title", str(semanticInfo[0][0]) + "  " + semanticInfo[0][1])
+    fig["layout"].setdefault("title", str(semanticInfo[0][0]) + "  " + semanticInfo[0][1] + "  " + tripDirection)
     fig["layout"].setdefault("titlefont", dict(size=30))
 
     for i in range(Num_of_bin * Num_of_bin):
@@ -172,7 +172,7 @@ def showHeatmapGraph(semanticLinkID, tripDirection):
     fig["layout"]["xaxis"].pop("dtick")
     fig["layout"]["yaxis"].pop("dtick")
 
-    offline.plot(fig, filename="CHORALE" + str(semanticLinkID) + ".html")
+    offline.plot(fig, filename="CHORALE" + str(semanticLinkID) + tripDirection + ".html")
 
 #outward
 for i in range(304, 327):
