@@ -11,59 +11,42 @@ import plotly.offline as offline
 import seaborn as sns
 from DBAccessor import DBAccessor as dbac
 from matplotlib import cm
+import plotly.io as pio
+import plotly.plotly as py
 
-
-def matplotlib_to_plotly(cmap, pl_entries):
-    h = 1.0/(pl_entries-1)
-    pl_colorscale = []
-    print(h)
-    for k in range(pl_entries):
-        C = list(map(np.uint8, np.array(cmap[:3])*k*h*255))
-
-        pl_colorscale.append([k*h, 'rgb'+str((C[0], C[1], C[2]))])
-
-    return pl_colorscale
-
-def get_cmap():
-    magma_cmap = matplotlib.cm.get_cmap('magma')
-    viridis_cmap = matplotlib.cm.get_cmap('viridis')
-
-    viridis_rgb = []
-    magma_rgb = []
-    norm = matplotlib.colors.Normalize(vmin=0, vmax=255)
-
-    for i in range(0, 255):
-       k = matplotlib.colors.colorConverter.to_rgb(magma_cmap(norm(i)))
-       magma_rgb.append(k)
-
-    for i in range(0, 255):
-       k = matplotlib.colors.colorConverter.to_rgb(viridis_cmap(norm(i)))
-       viridis_rgb.append(k)
-    
-    magma = matplotlib_to_plotly(magma_rgb, 255)
-    viridis = matplotlib_to_plotly(viridis_rgb, 255)
-
-    return magma,viridis
 
 def generateHeatmapData(Num_of_bin, df_result, xbin, ybin):
+    #print(df_result)
     result = np.empty((0, Num_of_bin), int)
     for i in range(Num_of_bin):
         arr = np.empty((0, Num_of_bin), int)
         for t in range(Num_of_bin):
-            df_af = df_result[(df_result[0] >= xbin[i]) & (df_result[0] < xbin[i + 1]) 
-            & (df_result[1] >= ybin[t]) & (df_result[1] < ybin[t + 1])]
-            arr = np.append(arr, len(df_af))      
+            if t == Num_of_bin - 1 or i == Num_of_bin - 1:
+                #print(str(xbin[i]) + "<= x <= " + str(xbin[i+1]) +"  " + str(ybin[t]) + "<= y <=" + str(ybin[t+1]))
+                df_af = df_result[(df_result[0] >= xbin[i]) & (df_result[0] <= xbin[i + 1]) 
+                & (df_result[1] >= ybin[t]) & (df_result[1] <= ybin[t + 1])]
+                arr = np.append(arr, len(df_af))
+                #print(df_af)
+                #print()
+            else:
+                #print(str(xbin[i]) + "<= x < " + str(xbin[i+1]) + "  " + str(ybin[t]) + "<= y <" + str(ybin[t+1]))
+                df_af = df_result[(df_result[0] >= xbin[i]) & (df_result[0] < xbin[i + 1]) 
+                & (df_result[1] >= ybin[t]) & (df_result[1] < ybin[t + 1])]
+                arr = np.append(arr, len(df_af))
+                #print(df_af)
+                #print()     
 
         result = np.append(result, [arr], axis=0)
         
-    return result
+    return result.T
 
 def sturgesFormula(n):
     return round(1 + math.log2(n))
 
-def generateBinData(data):
+def generateBinData(data, Num_of_bin):
     #ビン数計算
-    Num_of_bin = sturgesFormula(len(data))
+    #Num_of_bin = sturgesFormula(len(data))
+
     npresult = np.array(data, dtype='float')
 
 
@@ -72,14 +55,14 @@ def generateBinData(data):
     Q1 = df_result.quantile(.25)
     Q3 = df_result.quantile(.75)
     IQR = Q3 - Q1
-    print(IQR)
+    #print(IQR)
     maxthereshold = Q3 + 1.5 * IQR
     minthereshold = Q1 - 1.5 * IQR
-    print(minthereshold)
-    print(df_result)
+    #print(minthereshold)
+    #print(df_result)
     #df_result = df_result[(df_result[0] >= minthereshold[0]) & (df_result[0] <= maxthereshold[0])
     #            & (df_result[1] >= minthereshold[1]) & (df_result[1] <= maxthereshold[1])]
-    print(df_result)
+    #print(df_result)
     max = np.amax(npresult, axis=0)
     min = np.amin(npresult, axis=0)
 
@@ -95,12 +78,10 @@ def generateBinData(data):
     #if min[1] <= minthereshold[1]:
     #    min[1] = minthereshold[1]
     
-
     l = (max - min) / Num_of_bin
     xbin = generateEachBinData(Num_of_bin, min[0], l[0])
     ybin = generateEachBinData(Num_of_bin, min[1], l[1])
-
-    return xbin, ybin, df_result, Num_of_bin
+    return xbin, ybin, df_result
 
 def generateEachBinData(Num_of_bin, min, length):
     abin = np.array([])
@@ -112,18 +93,17 @@ def generateAxisData(xbin, ybin, Num_of_bin):
     xax = []
     yax = []
     for i in range(Num_of_bin):
-        xax.append('{:.2e}'.format((xbin[i] + xbin[i+1]) / 2))
-        yax.append('{:.2e}'.format((ybin[i] + ybin[i+1]) / 2))
+        xax.append('{:.3e}'.format((xbin[i] + xbin[i+1]) / 2))
+        yax.append('{:.3e}'.format((ybin[i] + ybin[i+1]) / 2))
 
     return xax, yax
 
-def showHeatmapGraph(semanticLinkID, tripDirection):
+def showHeatmapGraph(semanticLinkID, tripDirection, Num_of_bin, imageFlag=True):
     #クエリ実行
     result = dbac.ExecuteQueryFromList(dbac.QueryString(), [semanticLinkID, tripDirection])
     semanticInfo = dbac.ExecuteQueryFromList(dbac.QueryStringGetSemantics(), [semanticLinkID])
 
-    xbin, ybin, df_result, Num_of_bin = generateBinData(result)
-
+    xbin, ybin, df_result= generateBinData(result, Num_of_bin)
     heatmapData = generateHeatmapData(Num_of_bin, df_result, xbin, ybin)
 
     xax, yax = generateAxisData(xbin, ybin, Num_of_bin)
@@ -147,36 +127,82 @@ def showHeatmapGraph(semanticLinkID, tripDirection):
         xaxis=axis_layout,
         yaxis=axis_layout
         )
+    #print(fig)
+    fig["layout"].title = str(semanticInfo[0][0]) + "  " + semanticInfo[0][1] + "  " + tripDirection
+    #fig["layout"].setdefault("title", str(semanticInfo[0][0]) + "  " + semanticInfo[0][1] + "  " + tripDirection)
+    
+    fig["layout"].titlefont = dict(size=30)
+    #fig["layout"].setdefault("titlefont", dict(size=30))
 
-    fig["layout"].setdefault("title", str(semanticInfo[0][0]) + "  " + semanticInfo[0][1] + "  " + tripDirection)
-    fig["layout"].setdefault("titlefont", dict(size=30))
 
     for i in range(Num_of_bin * Num_of_bin):
-        fig["layout"]["annotations"][i]["font"].setdefault("size", 16)
+        fig["layout"]["annotations"][i]["font"].size = 16
+    #for i in range(Num_of_bin * Num_of_bin):
+    #    fig["layout"]["annotations"][i]["font"].setdefault("size", 16)
+    fig["layout"].margin = dict(l=100)
+    #fig["layout"].setdefault("margin", dict(l=100))
 
-    fig["layout"].setdefault("margin", dict(l=100))
 
-    fig["layout"]["xaxis"].setdefault("tickfont", dict(size=20))
-    fig["layout"]["yaxis"].setdefault("tickfont", dict(size=20))
+    fig["layout"]["xaxis"].tickfont = dict(size=20)
+    fig["layout"]["yaxis"].tickfont = dict(size=20)
+    #fig["layout"]["xaxis"].setdefault("tickfont", dict(size=20))
+    #fig["layout"]["yaxis"].setdefault("tickfont", dict(size=20))
 
-    fig["layout"]["xaxis"].setdefault("title", "Elapsed Time[s]")
-    fig["layout"]["yaxis"].setdefault("title", "LostEnergy[kWh]")
 
-    fig["layout"]["xaxis"].setdefault("titlefont", dict(size=20))
-    fig["layout"]["yaxis"].setdefault("titlefont", dict(size=20))
+    fig["layout"]["xaxis"].title = "Elapsed Time[s]"
+    fig["layout"]["yaxis"].title = "LostEnergy[kWh]"
+    #fig["layout"]["xaxis"].setdefault("title", "Elapsed Time[s]")
+    #fig["layout"]["yaxis"].setdefault("title", "LostEnergy[kWh]")
 
-    fig["layout"]["yaxis"].setdefault("tickformat", ".1e")
 
-    fig["layout"]["xaxis"].pop("side")
-    fig["layout"]["yaxis"].pop("ticksuffix")
-    fig["layout"]["xaxis"].pop("dtick")
-    fig["layout"]["yaxis"].pop("dtick")
+    fig["layout"]["xaxis"].titlefont = dict(size=20)
+    fig["layout"]["yaxis"].titlefont = dict(size=20)
+    #fig["layout"]["xaxis"].setdefault("titlefont", dict(size=20))
+    #fig["layout"]["yaxis"].setdefault("titlefont", dict(size=20))
 
+    fig["layout"]["yaxis"].tickformat = ".1e"
+    #fig["layout"]["yaxis"].setdefault("tickformat", ".1e")
+    #print(fig)
+
+    fig["layout"]["xaxis"].side = None
+    fig["layout"]["yaxis"].ticksuffix = None
+    fig["layout"]["xaxis"].dtick = None
+    fig["layout"]["yaxis"].dtick = None
+    
+    #fig["layout"]["xaxis"].pop("side")
+    #fig["layout"]["yaxis"].pop("ticksuffix")
+    #fig["layout"]["xaxis"].pop("dtick")
+    #fig["layout"]["yaxis"].pop("dtick")
+
+    #print(fig)
     offline.plot(fig, filename="CHORALE" + str(semanticLinkID) + tripDirection + ".html")
+    if imageFlag:
+        fig["layout"].width = 1280
+        fig["layout"].height = 960
+        pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + str(Num_of_bin) + ".png")
+        pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + str(Num_of_bin) + ".svg")
+
 
 #outward
-for i in range(304, 327):
-    showHeatmapGraph(i, "outward")
+#for i in range(332, 339):
+#    showHeatmapGraph(i, "outward")
 #homeward
-for i in range(305, 328):
-    showHeatmapGraph(i, "homeward")
+#for i in reversed(range(333, 339)):
+#    showHeatmapGraph(i, "homeward")
+
+#showHeatmapGraph(340, "homeward")
+
+if not os.path.exists('images'):
+    os.mkdir('images')
+
+id = 332
+tripdirection = "outward"
+imageFlag = False
+
+showHeatmapGraph(id, tripdirection, 5, imageFlag)
+showHeatmapGraph(id, tripdirection, 10, imageFlag)
+showHeatmapGraph(id, tripdirection, 20, imageFlag)
+showHeatmapGraph(id, tripdirection, 6, imageFlag)
+showHeatmapGraph(id, tripdirection, 7, imageFlag)
+showHeatmapGraph(id, tripdirection, 8, imageFlag)
+showHeatmapGraph(id, tripdirection, 9, imageFlag)

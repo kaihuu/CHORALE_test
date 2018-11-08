@@ -28,27 +28,22 @@ class DBAccessor:
     @classmethod
     def QueryString(self):
         query = """
-        DECLARE @id int, @direction varchar(max)
-        SET @id = ?;
-		SET @direction=?;
-
         SELECT COUNT(*), SUM(LOST_ENERGY)
-        FROM ECOLOG_Doppler_NotMM, SEMANTIC_LINKS
-        WHERE ECOLOG_Doppler_NotMM.DRIVER_ID = 17 AND SEMANTIC_LINKS.SEMANTIC_LINK_ID = @id AND SEMANTIC_LINKS.LINK_ID = ECOLOG_Doppler_NotMM.LINK_ID
-        AND ECOLOG_Doppler_NotMM.TRIP_DIRECTION = @direction
-        GROUP BY TRIP_ID
+        FROM ECOLOG_Doppler_NotMM, SEMANTIC_LINKS, TRIPS_Doppler_NotMM
+        WHERE ECOLOG_Doppler_NotMM.DRIVER_ID = 17 AND SEMANTIC_LINKS.SEMANTIC_LINK_ID = ? AND SEMANTIC_LINKS.LINK_ID = ECOLOG_Doppler_NotMM.LINK_ID
+        AND ECOLOG_Doppler_NotMM.TRIP_DIRECTION = ? AND TRIPS_Doppler_NotMM.TRIP_ID = ECOLOG_Doppler_NotMM.TRIP_ID
+		AND TRIPS_Doppler_NotMM.VALIDATION IS NULL
+        GROUP BY TRIPS_Doppler_NotMM.TRIP_ID
+		ORDER BY SUM(LOST_ENERGY)
         """
         return query
 
     @classmethod
     def QueryStringGetSemantics(self):
         query = """
-        DECLARE @id int
-        SET @id = ?;
-
         SELECT DISTINCT SEMANTIC_LINK_ID, SEMANTICS
         FROM SEMANTIC_LINKS
-        WHERE SEMANTIC_LINK_ID = @id
+        WHERE SEMANTIC_LINK_ID = ?
         """
         return query
 
