@@ -39,6 +39,20 @@ class DBAccessor:
         return query
 
     @classmethod
+    def QueryStringforECG(self):
+        query = """
+        SELECT COUNT(*), SUM(LOST_ENERGY), SUM(ABS(CONVERT_LOSS)),
+		SUM(ABS(REGENE_LOSS)), SUM(ENERGY_BY_AIR_RESISTANCE), SUM(ENERGY_BY_ROLLING_RESISTANCE)
+        FROM ECOLOG_Doppler_NotMM, SEMANTIC_LINKS, TRIPS_Doppler_NotMM
+        WHERE ECOLOG_Doppler_NotMM.DRIVER_ID = 17 AND SEMANTIC_LINKS.SEMANTIC_LINK_ID = ? AND SEMANTIC_LINKS.LINK_ID = ECOLOG_Doppler_NotMM.LINK_ID
+        AND ECOLOG_Doppler_NotMM.TRIP_DIRECTION = ? AND TRIPS_Doppler_NotMM.TRIP_ID = ECOLOG_Doppler_NotMM.TRIP_ID
+		AND TRIPS_Doppler_NotMM.VALIDATION IS NULL
+        GROUP BY TRIPS_Doppler_NotMM.TRIP_ID
+		ORDER BY SUM(LOST_ENERGY)
+        """
+        return query
+
+    @classmethod
     def QueryStringGetSemantics(self):
         query = """
         SELECT DISTINCT SEMANTIC_LINK_ID, SEMANTICS
