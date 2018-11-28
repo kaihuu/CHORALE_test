@@ -102,9 +102,8 @@ def generateAxisData(xbin, ybin, X_Num_of_bin, Y_Num_of_bin):
 
     return xax, yax
 
-def showHeatmapGraph(semanticLinkID, tripDirection, X_Num_of_bin, Y_Num_of_bin, imageFlag=True):
+def showHeatmapGraph(result, semanticLinkID, tripDirection, X_Num_of_bin, Y_Num_of_bin, imageFlag=True):
     #クエリ実行
-    result = dbac.ExecuteQueryFromList(dbac.QueryString(), [semanticLinkID, tripDirection])
     semanticInfo = dbac.ExecuteQueryFromList(dbac.QueryStringGetSemantics(), [semanticLinkID])
 
     xbin, ybin, df_result= generateBinData(result, X_Num_of_bin, Y_Num_of_bin)
@@ -210,16 +209,25 @@ args = parser.parse_args()
 imageFlag = True
 listFlag = args.en
 
+#result = dbac.ExecuteQueryFromList(dbac.QueryString(), [id, tripdirection])
+#result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial333outward1(), [id, tripdirection])
+result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial333outward2(), [id, tripdirection])
+
 if listFlag:
-    showHeatmapGraph(id, tripdirection, 5,5, imageFlag)
-    showHeatmapGraph(id, tripdirection, 10,10, imageFlag)
-    showHeatmapGraph(id, tripdirection, 20,20, imageFlag)
-    showHeatmapGraph(id, tripdirection, 6,6, imageFlag)
-    showHeatmapGraph(id, tripdirection, 7,7, imageFlag)
-    showHeatmapGraph(id, tripdirection, 8,8, imageFlag)
-    showHeatmapGraph(id, tripdirection, 9,9, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 3,3, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 5,5, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,10, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 20,20, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 6,6, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 7,7, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 8,8, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 9,9, imageFlag)
 else:
-    showHeatmapGraph(id, tripdirection, 15,9, imageFlag)
-    showHeatmapGraph(id, tripdirection, 20,9, imageFlag)
-    showHeatmapGraph(id, tripdirection, 25,9, imageFlag)
-    showHeatmapGraph(id, tripdirection, 30,9, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 4,5, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 5,5, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 6,5, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 7,5, imageFlag)
+    #showHeatmapGraph(result, id, tripdirection, 15,9, imageFlag)
+    #showHeatmapGraph(result, id, tripdirection, 20,9, imageFlag)
+    #showHeatmapGraph(result, id, tripdirection, 25,9, imageFlag)
+    #showHeatmapGraph(result, id, tripdirection, 30,9, imageFlag)
