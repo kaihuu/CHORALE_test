@@ -1,5 +1,7 @@
 import math
 import os
+import sys
+import argparse
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -15,13 +17,13 @@ import plotly.io as pio
 import plotly.plotly as py
 
 
-def generateHeatmapData(Num_of_bin, df_result, xbin, ybin):
+def generateHeatmapData(X_Num_of_bin, Y_Num_of_bin, df_result, xbin, ybin):
     #print(df_result)
-    result = np.empty((0, Num_of_bin), int)
-    for i in range(Num_of_bin):
-        arr = np.empty((0, Num_of_bin), int)
-        for t in range(Num_of_bin):
-            if t == Num_of_bin - 1 or i == Num_of_bin - 1:
+    result = np.empty((0, Y_Num_of_bin), int)
+    for i in range(X_Num_of_bin):
+        arr = np.empty((0, X_Num_of_bin), int)
+        for t in range(Y_Num_of_bin):
+            if t == Y_Num_of_bin - 1 or i == X_Num_of_bin - 1:
                 #print(str(xbin[i]) + "<= x <= " + str(xbin[i+1]) +"  " + str(ybin[t]) + "<= y <=" + str(ybin[t+1]))
                 df_af = df_result[(df_result[0] >= xbin[i]) & (df_result[0] <= xbin[i + 1]) 
                 & (df_result[1] >= ybin[t]) & (df_result[1] <= ybin[t + 1])]
@@ -43,7 +45,7 @@ def generateHeatmapData(Num_of_bin, df_result, xbin, ybin):
 def sturgesFormula(n):
     return round(1 + math.log2(n))
 
-def generateBinData(data, Num_of_bin):
+def generateBinData(data, X_Num_of_bin, Y_Num_of_bin):
     #ビン数計算
     #Num_of_bin = sturgesFormula(len(data))
 
@@ -78,9 +80,10 @@ def generateBinData(data, Num_of_bin):
     #if min[1] <= minthereshold[1]:
     #    min[1] = minthereshold[1]
     
-    l = (max - min) / Num_of_bin
-    xbin = generateEachBinData(Num_of_bin, min[0], l[0])
-    ybin = generateEachBinData(Num_of_bin, min[1], l[1])
+    xl = (max[0] - min[0]) / X_Num_of_bin
+    yl = (max[1] - min[1]) / Y_Num_of_bin
+    xbin = generateEachBinData(X_Num_of_bin, min[0], xl)
+    ybin = generateEachBinData(Y_Num_of_bin, min[1], yl)
     return xbin, ybin, df_result
 
 def generateEachBinData(Num_of_bin, min, length):
@@ -89,24 +92,25 @@ def generateEachBinData(Num_of_bin, min, length):
         abin = np.append(abin, [min + float(i) * length])
     return abin
 
-def generateAxisData(xbin, ybin, Num_of_bin):
+def generateAxisData(xbin, ybin, X_Num_of_bin, Y_Num_of_bin):
     xax = []
     yax = []
-    for i in range(Num_of_bin):
+    for i in range(X_Num_of_bin):
         xax.append('{:.3e}'.format((xbin[i] + xbin[i+1]) / 2))
+    for i in range(Y_Num_of_bin):
         yax.append('{:.3e}'.format((ybin[i] + ybin[i+1]) / 2))
 
     return xax, yax
 
-def showHeatmapGraph(semanticLinkID, tripDirection, Num_of_bin, imageFlag=True):
+def showHeatmapGraph(semanticLinkID, tripDirection, X_Num_of_bin, Y_Num_of_bin, imageFlag=True):
     #クエリ実行
     result = dbac.ExecuteQueryFromList(dbac.QueryString(), [semanticLinkID, tripDirection])
     semanticInfo = dbac.ExecuteQueryFromList(dbac.QueryStringGetSemantics(), [semanticLinkID])
 
-    xbin, ybin, df_result= generateBinData(result, Num_of_bin)
-    heatmapData = generateHeatmapData(Num_of_bin, df_result, xbin, ybin)
+    xbin, ybin, df_result= generateBinData(result, X_Num_of_bin, Y_Num_of_bin)
+    heatmapData = generateHeatmapData(X_Num_of_bin, Y_Num_of_bin, df_result, xbin, ybin)
 
-    xax, yax = generateAxisData(xbin, ybin, Num_of_bin)
+    xax, yax = generateAxisData(xbin, ybin, X_Num_of_bin, Y_Num_of_bin)
 
     hoverlabel = dict(font=dict(size=20))
     colorbar = dict(tickfont=dict(size=20))
@@ -135,7 +139,7 @@ def showHeatmapGraph(semanticLinkID, tripDirection, Num_of_bin, imageFlag=True):
     #fig["layout"].setdefault("titlefont", dict(size=30))
 
 
-    for i in range(Num_of_bin * Num_of_bin):
+    for i in range(X_Num_of_bin * Y_Num_of_bin):
         fig["layout"]["annotations"][i]["font"].size = 16
     #for i in range(Num_of_bin * Num_of_bin):
     #    fig["layout"]["annotations"][i]["font"].setdefault("size", 16)
@@ -168,19 +172,20 @@ def showHeatmapGraph(semanticLinkID, tripDirection, Num_of_bin, imageFlag=True):
     fig["layout"]["yaxis"].ticksuffix = None
     fig["layout"]["xaxis"].dtick = None
     fig["layout"]["yaxis"].dtick = None
-    
+    fig["layout"].width = 1280
+    fig["layout"].height = 960    
     #fig["layout"]["xaxis"].pop("side")
     #fig["layout"]["yaxis"].pop("ticksuffix")
     #fig["layout"]["xaxis"].pop("dtick")
     #fig["layout"]["yaxis"].pop("dtick")
 
     #print(fig)
-    offline.plot(fig, filename="CHORALE" + str(semanticLinkID) + tripDirection + ".html")
+    offline.plot(fig, filename="CHORALE" + str(semanticLinkID) + tripDirection + str(X_Num_of_bin) + "," + str(Y_Num_of_bin) + ".html")
     if imageFlag:
         fig["layout"].width = 1280
         fig["layout"].height = 960
-        pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + str(Num_of_bin) + ".png")
-        pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + str(Num_of_bin) + ".svg")
+        #pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + str(Num_of_bin) + ".png")
+        pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + str(X_Num_of_bin) + "," + str(Y_Num_of_bin) + ".svg")
 
 
 #outward
@@ -195,14 +200,26 @@ def showHeatmapGraph(semanticLinkID, tripDirection, Num_of_bin, imageFlag=True):
 if not os.path.exists('images'):
     os.mkdir('images')
 
-id = 332
+id = 333
 tripdirection = "outward"
-imageFlag = False
 
-showHeatmapGraph(id, tripdirection, 5, imageFlag)
-showHeatmapGraph(id, tripdirection, 10, imageFlag)
-showHeatmapGraph(id, tripdirection, 20, imageFlag)
-showHeatmapGraph(id, tripdirection, 6, imageFlag)
-showHeatmapGraph(id, tripdirection, 7, imageFlag)
-showHeatmapGraph(id, tripdirection, 8, imageFlag)
-showHeatmapGraph(id, tripdirection, 9, imageFlag)
+parser = argparse.ArgumentParser()
+parser.add_argument('--en', action='store_true')
+args = parser.parse_args()
+
+imageFlag = True
+listFlag = args.en
+
+if listFlag:
+    showHeatmapGraph(id, tripdirection, 5,5, imageFlag)
+    showHeatmapGraph(id, tripdirection, 10,10, imageFlag)
+    showHeatmapGraph(id, tripdirection, 20,20, imageFlag)
+    showHeatmapGraph(id, tripdirection, 6,6, imageFlag)
+    showHeatmapGraph(id, tripdirection, 7,7, imageFlag)
+    showHeatmapGraph(id, tripdirection, 8,8, imageFlag)
+    showHeatmapGraph(id, tripdirection, 9,9, imageFlag)
+else:
+    showHeatmapGraph(id, tripdirection, 15,9, imageFlag)
+    showHeatmapGraph(id, tripdirection, 20,9, imageFlag)
+    showHeatmapGraph(id, tripdirection, 25,9, imageFlag)
+    showHeatmapGraph(id, tripdirection, 30,9, imageFlag)
