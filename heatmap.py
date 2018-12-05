@@ -199,7 +199,7 @@ def showHeatmapGraph(result, semanticLinkID, tripDirection, X_Num_of_bin, Y_Num_
 if not os.path.exists('images'):
     os.mkdir('images')
 
-id = 333
+id = 332
 tripdirection = "outward"
 
 parser = argparse.ArgumentParser()
@@ -211,7 +211,9 @@ listFlag = args.en
 
 #result = dbac.ExecuteQueryFromList(dbac.QueryString(), [id, tripdirection])
 #result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial333outward1(), [id, tripdirection])
-result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial333outward2(), [id, tripdirection])
+#result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial333outward2(), [id, tripdirection])
+#result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial337outward1(), [id, tripdirection])
+result = dbac.ExecuteQueryFromList(dbac.QueryStringSpecial337outward2(), [id, tripdirection])
 
 if listFlag:
     showHeatmapGraph(result, id, tripdirection, 3,3, imageFlag)
@@ -223,10 +225,12 @@ if listFlag:
     showHeatmapGraph(result, id, tripdirection, 8,8, imageFlag)
     showHeatmapGraph(result, id, tripdirection, 9,9, imageFlag)
 else:
-    showHeatmapGraph(result, id, tripdirection, 4,5, imageFlag)
-    showHeatmapGraph(result, id, tripdirection, 5,5, imageFlag)
-    showHeatmapGraph(result, id, tripdirection, 6,5, imageFlag)
-    showHeatmapGraph(result, id, tripdirection, 7,5, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,8, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,9, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,10, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,11, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,12, imageFlag)
+    showHeatmapGraph(result, id, tripdirection, 10,13, imageFlag)
     #showHeatmapGraph(result, id, tripdirection, 15,9, imageFlag)
     #showHeatmapGraph(result, id, tripdirection, 20,9, imageFlag)
     #showHeatmapGraph(result, id, tripdirection, 25,9, imageFlag)

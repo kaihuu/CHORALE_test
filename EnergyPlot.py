@@ -65,4 +65,4 @@ def showHeatmapGraph(semanticLinkID, tripDirection, imageFlag=True):
         #pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + ".png")
         pio.write_image(fig, "images/CHORALE" + str(semanticLinkID) + tripDirection + ".svg")
 
-showHeatmapGraph(333, "outward")
+showHeatmapGraph(334, "outward")
