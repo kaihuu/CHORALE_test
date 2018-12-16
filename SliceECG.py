@@ -6,29 +6,21 @@ import numpy as np
 
 def getTrace(testID, name):
     #result = dbac.ExecuteQueryFromList(dbac.QueryStringGetLatencyTestTime(), [testID])
-    result = np.array([1.0,1.1,1.2,1.1,1.2])
+    yresult = np.array([1.0,1.11,1.21,1.1,1.2])
+    xresult = np.full(5,"Convert Loss")
 
     #npresult = np.array(result)
 
-    trace0 = go.Box(
+    trace0 = go.Scatter(
+        x=xresult,
         #y = npresult[:, 3:4].flatten(),
-        y=result,
-        name = name,
-        #jitter = 0.3,
-        #pointpos = -1.8,
-        boxpoints = 'all',
-        #marker = dict(
-        #    color = 'rgb(7,40,89)'),
-        #line = dict(
-        #    color = 'rgb(7,40,89)')
+        y=yresult,
+        mode='markers'
     )
     return trace0
 
 
-data = [getTrace(85, "N=1"), getTrace(86, "N=2"), getTrace(87, "N=3"), getTrace(88, "N=4")
-, getTrace(89, "N=5"),getTrace(90, "N=10"),getTrace(91, "N=15")
-, getTrace(92, "N=20"), getTrace(93, " N=50"), getTrace(94, "N=100") , getTrace(95, "N=500")
- , getTrace(97, "N=1000")]
+data = [getTrace(85, "N=1")]
 
 layout = go.Layout(
     xaxis=dict(tickfont=dict(size=20)),
