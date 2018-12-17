@@ -135,6 +135,8 @@ class DBAccessor:
         """
         return query
 
+
+
     @classmethod
     def ExecuteManyInsert(self, query, dataList):
         cnn = pyodbc.connect(self.config)
