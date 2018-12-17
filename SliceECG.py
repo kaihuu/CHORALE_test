@@ -7,7 +7,7 @@ from datetime import datetime,timedelta
 import os
 import googlemaps
 
-def getTrace(semanticLinkID):
+def getTrace(semanticLinkID, tripDirection):
     #result = dbac.ExecuteQueryFromList(dbac.QueryStringGetLatencyTestTime(), [testID])
     endpoints = dbac.ExecuteQueryFromList(dbac.QueryStringGetEndPoints(), [semanticLinkID])
     
@@ -19,11 +19,12 @@ def getTrace(semanticLinkID):
     duration = matrix["rows"][0]["elements"][0]["duration_in_traffic"]["value"]
     print(duration)
     print(type(duration))
-    yresult = np.array([1.0,1.11,1.21,1.1,1.2])
-    xresult = np.full(5,"Convert Loss")
-
-    #npresult = np.array(result)
-
+    result = dbac.ExecuteQueryFromList(dbac.QueryStringSliceECGData(), [duration, semanticLinkID, tripDirection])
+    
+    npresult = np.array(result)
+    
+    xresult = npresult[:, 0:1].flatten()
+    print(xresult)
     trace0 = go.Scatter(
         x=xresult,
         #y = npresult[:, 3:4].flatten(),
@@ -49,7 +50,7 @@ gmaps = googlemaps.Client(key=api_key)
 
 
 
-data = [getTrace(207)]
+data = [getTrace(207, 'homeward')]
 
 layout = go.Layout(
     xaxis=dict(tickfont=dict(size=20)),

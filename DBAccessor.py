@@ -148,6 +148,21 @@ class DBAccessor:
         """
         return query
 
+    @classmethod
+    def QueryStringSliceECGData(self):
+        query = """
+        DECLARE @dutation int;
+		SET @dutation = ?
+		SELECT SUM(LOST_ENERGY), SUM(CONVERT_LOSS), SUM(REGENE_LOSS), SUM(ENERGY_BY_AIR_RESISTANCE), SUM(ENERGY_BY_ROLLING_RESISTANCE)
+        FROM ECOLOG_Doppler AS ECOLOG, SEMANTIC_LINKS, TRIPS_Doppler AS TRIPS
+        WHERE ECOLOG.DRIVER_ID = SEMANTIC_LINKS.DRIVER_ID AND SEMANTIC_LINKS.SEMANTIC_LINK_ID = ? AND SEMANTIC_LINKS.LINK_ID = ECOLOG.LINK_ID
+        AND ECOLOG.TRIP_DIRECTION = ? AND TRIPS.TRIP_ID = ECOLOG.TRIP_ID
+        GROUP BY TRIPS.TRIP_ID
+		HAVING COUNT(*) > @dutation - 2.5 AND COUNT(*) < @dutation + 2.5
+		ORDER BY SUM(LOST_ENERGY)
+        """
+        return query
+
 
     @classmethod
     def ExecuteManyInsert(self, query, dataList):
