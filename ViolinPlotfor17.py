@@ -34,7 +34,7 @@ def maketrace(df, name, side, legend):
 
 
 #with open('pcpdata1.json', encoding='shift_jis') as f:
-with open('pcpdata1.json', encoding='utf-8') as f:
+with open('pcpdata17.json', encoding='utf-8') as f:
     d = json.load(f)
     #print(d)
     data = json.dumps(d, ensure_ascii=False)
@@ -47,30 +47,30 @@ with open('pcpdata1.json', encoding='utf-8') as f:
 
 
 #print(df)
-print(df['ElapsedTime(s)'][df['Signal2'] == '通過'])
+print(df['ElapsedTime(s)'][df['Signal'] == '通過'])
 print(df.columns.values)
 
 
-newlist = [df.columns.values[1], df.columns.values[2],df.columns.values[3],df.columns.values[4]
-,df.columns.values[11],df.columns.values[12]]
+newlist = [df.columns.values[0],df.columns.values[1],df.columns.values[2],df.columns.values[3]
+,df.columns.values[6],df.columns.values[7]]
 
 fig = tools.make_subplots(rows=1, cols=6)
 
 #fig = {
 #    "data": [
 
-trace1 = maketrace(df[newlist[0]][df['Signal2'] == '通過'], newlist[0], 'negative', 'Pass')
-trace2 = maketrace(df[newlist[0]][df['Signal2'] == '停止'], newlist[0], 'positive', 'Stop')
-trace3 = maketrace(df[newlist[1]][df['Signal2'] == '通過'], newlist[1], 'negative', 'Pass')
-trace4 = maketrace(df[newlist[1]][df['Signal2'] == '停止'], newlist[1], 'positive', 'Stop')
-trace5 = maketrace(df[newlist[2]][df['Signal2'] == '通過'], newlist[2], 'negative', 'Pass')
-trace6 = maketrace(df[newlist[2]][df['Signal2'] == '停止'], newlist[2], 'positive', 'Stop')
-trace7 = maketrace(df[newlist[3]][df['Signal2'] == '通過'], newlist[3], 'negative', 'Pass')
-trace8 = maketrace(df[newlist[3]][df['Signal2'] == '停止'], newlist[3], 'positive', 'Stop')
-trace9 = maketrace(df[newlist[4]][df['Signal2'] == '通過'], newlist[4], 'negative', 'Pass')
-trace10 = maketrace(df[newlist[4]][df['Signal2'] == '停止'], newlist[4], 'positive', 'Stop')
-trace11 = maketrace(df[newlist[5]][df['Signal2'] == '通過'], newlist[5], 'negative', 'Pass')
-trace12 = maketrace(df[newlist[5]][df['Signal2'] == '停止'], newlist[5], 'positive', 'Stop')
+trace1 = maketrace(df[newlist[0]][df['Signal'] == '通過'], newlist[0], 'negative', 'Pass')
+trace2 = maketrace(df[newlist[0]][df['Signal'] == '停止'], newlist[0], 'positive', 'Stop')
+trace3 = maketrace(df[newlist[1]][df['Signal'] == '通過'], newlist[1], 'negative', 'Pass')
+trace4 = maketrace(df[newlist[1]][df['Signal'] == '停止'], newlist[1], 'positive', 'Stop')
+trace5 = maketrace(df[newlist[2]][df['Signal'] == '通過'], newlist[2], 'negative', 'Pass')
+trace6 = maketrace(df[newlist[2]][df['Signal'] == '停止'], newlist[2], 'positive', 'Stop')
+trace7 = maketrace(df[newlist[3]][df['Signal'] == '通過'], newlist[3], 'negative', 'Pass')
+trace8 = maketrace(df[newlist[3]][df['Signal'] == '停止'], newlist[3], 'positive', 'Stop')
+trace9 = maketrace(df[newlist[4]][df['Signal'] == '通過'], newlist[4], 'negative', 'Pass')
+trace10 = maketrace(df[newlist[4]][df['Signal'] == '停止'], newlist[4], 'positive', 'Stop')
+trace11 = maketrace(df[newlist[5]][df['Signal'] == '通過'], newlist[5], 'negative', 'Pass')
+trace12 = maketrace(df[newlist[5]][df['Signal'] == '停止'], newlist[5], 'positive', 'Stop')
 
 fig.append_trace(trace1,1,1)
 fig.append_trace(trace2,1,1)
@@ -94,4 +94,4 @@ fig.append_trace(trace12,1,6)
 #}
 
 
-offline.plot(fig, filename = 'split1.html', validate = False)
+offline.plot(fig, filename = 'split17.html', validate = False)
