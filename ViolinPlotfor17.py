@@ -54,10 +54,21 @@ print(df.columns.values)
 newlist = [df.columns.values[0],df.columns.values[1],df.columns.values[2],df.columns.values[3]
 ,df.columns.values[6],df.columns.values[7]]
 
-fig = tools.make_subplots(rows=1, cols=6)
+
+
+df_pass = df[df['Signal'] == '通過']
+df_pass_corr = df_pass.corr()
+print(df_pass_corr[df.columns.values[0]][df.columns.values[2]])
+print(df_pass_corr[df.columns.values[1]][df.columns.values[3]])
+df_stop = df[df['Signal'] == '停止']
+df_stop_corr = df_stop.corr()
+print(df_stop_corr[df.columns.values[0]][df.columns.values[2]])
+print(df_stop_corr[df.columns.values[1]][df.columns.values[3]])
 
 #fig = {
 #    "data": [
+fig = tools.make_subplots(rows=1, cols=6)
+
 
 trace1 = maketrace(df[newlist[0]][df['Signal'] == '通過'], newlist[0], 'negative', 'Pass')
 trace2 = maketrace(df[newlist[0]][df['Signal'] == '停止'], newlist[0], 'positive', 'Stop')

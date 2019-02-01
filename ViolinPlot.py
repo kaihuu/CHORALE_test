@@ -56,6 +56,14 @@ newlist = [df.columns.values[1], df.columns.values[2],df.columns.values[3],df.co
 
 fig = tools.make_subplots(rows=1, cols=6)
 
+df_pass = df[df['Signal2'] == '通過']
+df_pass_corr = df_pass.corr()
+print(df_pass_corr[df.columns.values[1]][df.columns.values[3]])
+print(df_pass_corr[df.columns.values[2]][df.columns.values[4]])
+df_stop = df[df['Signal2'] == '停止']
+df_stop_corr = df_stop.corr()
+print(df_stop_corr[df.columns.values[1]][df.columns.values[3]])
+print(df_stop_corr[df.columns.values[2]][df.columns.values[4]])
 #fig = {
 #    "data": [
 
